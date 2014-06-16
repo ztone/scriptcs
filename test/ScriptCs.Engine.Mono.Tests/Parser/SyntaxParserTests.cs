@@ -3,10 +3,8 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
     using System;
     using System.Linq;
 
-    using ScriptCs.Engine.Mono.Parser;
-
+    using ScriptCs.Engine.Mono.Parser.NRefactory;
     using Should;
-
     using Xunit;
 
     public class SyntaxParserTests

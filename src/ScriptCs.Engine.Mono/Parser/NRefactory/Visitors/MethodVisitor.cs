@@ -1,4 +1,4 @@
-namespace ScriptCs.Engine.Mono.Parser.Visitors
+namespace ScriptCs.Engine.Mono.Parser.NRefactory.Visitors
 {
     using System;
     using System.Collections.Generic;

@@ -7,7 +7,7 @@ using System.Text;
 using Common.Logging;
 using MonoCSharp::Mono.CSharp;
 using ScriptCs.Contracts;
-using ScriptCs.Engine.Mono.Parser;
+using ScriptCs.Engine.Mono.Parser.NRefactory;
 
 namespace ScriptCs.Engine.Mono
 {

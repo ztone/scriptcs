@@ -1,4 +1,4 @@
-﻿namespace ScriptCs.Engine.Mono.Parser.Visitors
+﻿namespace ScriptCs.Engine.Mono.Parser.NRefactory.Visitors
 {
     using ICSharpCode.NRefactory.CSharp;
 
