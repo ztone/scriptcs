@@ -150,13 +150,13 @@ namespace ScriptCs.Engine.Mono.Preparser.Lexer
 
         private static bool IsAlpha(int token)
         {
-            Regex rg = new Regex(@"            ^[a-zA-Z_@]*$");
+            Regex rg = new Regex(@"^[a-zA-Z_@]*$");
             return rg.IsMatch(((char)token).ToString());
         }
 
         private static bool IsAlphaNumeric(int token)
         {
-            Regex rg = new Regex(@"            ^[a-zA-Z0-9_]*$");
+            Regex rg = new Regex(@"^[a-zA-Z0-9_]*$");
             return rg.IsMatch(((char)token).ToString());
         }
 

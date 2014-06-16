@@ -99,6 +99,7 @@
     <Compile Include="Parser\Preparser\ParserResult.cs" />
     <Compile Include="Parser\Preparser\ScriptParser.cs" />
     <Compile Include="Parser\Preparser\ScriptDocument.cs" />
+    <Compile Include="Parser\Preparser\CodeSegementer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

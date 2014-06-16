@@ -1,4 +1,4 @@
-namespace ScriptCs.Engine.Mono.Preparser
+namespace ScriptCs.Engine.Mono.Parser.Preparser
 {
     using System;
     using System.Collections.Generic;

@@ -1,4 +1,4 @@
-namespace ScriptCs.Engine.Mono.Preparser
+namespace ScriptCs.Engine.Mono.Parser.Preparser
 {
     using System;
     using System.Collections.Generic;
@@ -7,12 +7,16 @@ namespace ScriptCs.Engine.Mono.Preparser
     {
         public string ExtractRegions(string code, IEnumerable<RegionResult> regions)
         {
-            var document = new string(' ', code.Length);
-            foreach(var region in regions)
+            var document = CloneAsEmptyStringWithNewLine(code);
+
+            if(regions != null)
             {
-                var snippet = code.Substring(region.Offset, region.Length);
-                document = document.Remove(region.Offset, region.Length);
-                document = document.Insert(region.Offset, snippet);
+                foreach(var region in regions)
+                {
+                    var snippet = code.Substring(region.Offset, region.Length);
+                    document = document.Remove(region.Offset, region.Length);
+                    document = document.Insert(region.Offset, snippet);
+                }
             }
 
             return document;
@@ -21,13 +25,35 @@ namespace ScriptCs.Engine.Mono.Preparser
         public string PurgeRegions(string code, IEnumerable<RegionResult> regions)
         {
             var document = code;
-            foreach(var region in regions)
+            if(regions != null)
             {
-                document = document.Remove(region.Offset, region.Length);
-                document = document.Insert(region.Offset, new string(' ', region.Length));
+                foreach(var region in regions)
+                {
+                    var snippet = CloneAsEmptyStringWithNewLine(code.Substring(region.Offset, region.Length));
+                    document = document.Remove(region.Offset, region.Length);
+                    document = document.Insert(region.Offset, snippet);
+                }
             }
 
             return document;
+        }
+
+        private string CloneAsEmptyStringWithNewLine(string str)
+        {
+            var result = new string(' ', str.Length);
+
+            var tmp = str;
+            int index = 0;
+            while((index = tmp.IndexOf(Environment.NewLine)) != -1)
+            {
+                result = result.Remove(index, Environment.NewLine.Length);
+                result = result.Insert(index, Environment.NewLine);
+
+                tmp = tmp.Remove(index, Environment.NewLine.Length);
+                tmp = tmp.Insert(index, new string(' ', Environment.NewLine.Length));
+            }
+
+            return result;
         }
     }
 }

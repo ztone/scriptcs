@@ -8,6 +8,7 @@ using Common.Logging;
 using MonoCSharp::Mono.CSharp;
 using ScriptCs.Contracts;
 using ScriptCs.Engine.Mono.Parser.NRefactory;
+using ScriptCs.Engine.Mono.Parser.Preparser;
 
 namespace ScriptCs.Engine.Mono
 {
@@ -93,6 +94,17 @@ namespace ScriptCs.Engine.Mono
         {
             try
             {
+                var segmenter = new CodeSegementer();
+                object scriptResult = null;
+                foreach(var segment in segmenter.Run(code))
+                {
+                    bool resultSet;
+                    session.Evaluate(segment, out scriptResult, out resultSet);
+                }
+
+                return new ScriptResult(returnValue: scriptResult);
+
+                /*
                 var parser = new SyntaxParser();
                 var parseResult = parser.Parse(code);
 
@@ -126,13 +138,14 @@ namespace ScriptCs.Engine.Mono
 
                     return new ScriptResult(returnValue: scriptResult);
                 }
+                */
             }
             catch (Exception ex)
             {
                 return new ScriptResult(executionException: ex);
             }
 
-            return ScriptResult.Empty;
+            //return ScriptResult.Empty;
         }
 
         private void ImportNamespaces(IEnumerable<string> namespaces, SessionState<Evaluator> sessionState)
