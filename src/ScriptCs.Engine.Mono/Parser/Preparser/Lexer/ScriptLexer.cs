@@ -1,4 +1,4 @@
-namespace ScriptCs.Engine.Mono.Preparser.Lexer
+namespace ScriptCs.Engine.Mono.Parser.Preparser.Lexer
 {
     using System;
     using System.Collections.Generic;
@@ -37,6 +37,50 @@ namespace ScriptCs.Engine.Mono.Preparser.Lexer
             while(IsSpace((char)_lastChar))
             {
                 _lastChar = Read();
+            }
+
+            if(_lastChar == Token.Quote)
+            {
+                _identifier = string.Empty;
+                _identifier += (char)_lastChar;
+
+                int previous;
+                do {
+                    previous = _lastChar;
+                    _lastChar = Read();
+                    _identifier += (char)_lastChar;
+                } while(!(_lastChar == Token.Quote && previous != Token.EscapeChar) 
+                    && _lastChar != Token.Eof);
+
+                _lastChar = Read(); //eat
+
+                return new LexerResult
+                {
+                    Code = Token.String,
+                    Identifier = _identifier,
+                    Start = StartPos(),
+                    End = _position
+                };
+            }
+
+            if(_lastChar == Token.SingleQuote)
+            {
+                string character = string.Empty;
+                character += (char)_lastChar;
+
+                _lastChar = Read(); //eat
+                character += (char)_lastChar;
+
+                _lastChar = Read(); //eat
+                character += (char)_lastChar;
+
+                return new LexerResult
+                {
+                    Code = Token.Character,
+                    Identifier = character,
+                    Start = _position - (character.Length - 1),
+                    End = _position
+                };
             }
 
             // identifiers [a-zA-Z_][a-zA-Z0-9_]

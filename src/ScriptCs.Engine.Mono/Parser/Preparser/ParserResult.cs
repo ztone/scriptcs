@@ -12,6 +12,8 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
 
             ClassRegions = new List<RegionResult>();
             MethodRegions = new List<RegionResult>();
+
+            Segments = new List<RegionResult>();
         }
 
         public List<Tuple<bool, string>> Classes { get; set; }
@@ -21,6 +23,8 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
         public List<RegionResult> ClassRegions { get; set; }
 
         public List<RegionResult> MethodRegions { get; set; }
+
+        public List<RegionResult> Segments { get; set; }
     }
 }
 

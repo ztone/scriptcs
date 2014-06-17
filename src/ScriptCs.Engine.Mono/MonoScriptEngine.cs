@@ -96,7 +96,7 @@ namespace ScriptCs.Engine.Mono
             {
                 var segmenter = new CodeSegementer();
                 object scriptResult = null;
-                foreach(var segment in segmenter.Run(code))
+                foreach(var segment in segmenter.Segment(code))
                 {
                     bool resultSet;
                     session.Evaluate(segment, out scriptResult, out resultSet);

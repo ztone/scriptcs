@@ -1,3 +1,5 @@
+using System;
+
 namespace ScriptCs.Engine.Mono.Parser.Preparser
 {
     using System;
@@ -7,10 +9,10 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
 
     using ScriptCs.Engine.Mono.Parser.Preparser.Lexer;
 
-    public class ScriptParser
+    public class ScriptSegmenter
     {
         private ScriptLexer _lexer;
-        private LexerResult _lexResult;
+        private LexerResult _curLexResult;
         private Stack<LexerResult> _history = new Stack<LexerResult>();
 
         public int TokenCount
@@ -19,7 +21,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
         }
 
 
-        public ParserResult Parse (string code)
+        public ParserResult Segment (string code)
         {
             _lexer = new ScriptLexer(code);
             GetNextToken();
@@ -28,9 +30,9 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
 
         private LexerResult GetNextToken()
         {
-            _lexResult = _lexer.GetToken();
-            _history.Push(_lexResult);
-            return _lexResult;
+            _curLexResult = _lexer.GetToken();
+            _history.Push(_curLexResult);
+            return _curLexResult;
         }
 
         private ParserResult MainLoop(string code)
@@ -39,33 +41,14 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
             while(true)
             {
                 RegionResult region;
-                switch(_lexResult.Code)
+                switch(_curLexResult.Code)
                 {
                 case Token.Eof: return _result;
                 case Token.Class:
-                    region = ParseBlock();
-                    if(region.IsValid)
-                    {
-                        _result.ClassRegions.Add(region);
-                        _result.Classes.Add( (!region.IsIncomplete)
-                            ? new Tuple<bool, string>(false, code.Substring(region.Offset, region.Length))
-                            : new Tuple<bool, string>(true, string.Empty));
-                    }
-                    GetNextToken();
-                    break;
-                case Token.Block: 
-                    ParseBlock(); 
-                    GetNextToken();
-                    break;
-                case Token.LeftParenthese:
-                    region = ParseMethod();
-                    if(region.IsValid)
-                    {
-                        _result.MethodRegions.Add(region);
-                        _result.Methods.Add( (!region.IsIncomplete)
-                            ? new Tuple<bool, string>(false, code.Substring(region.Offset, region.Length))
-                            : new Tuple<bool, string>(true, string.Empty));
-                    }
+                case Token.Block:
+                case Token.Identifier:
+                    region = ParseStatement(); 
+                    _result.Segments.Add(region);
                     GetNextToken();
                     break;
                 default: 
@@ -75,33 +58,43 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
             }
         }
 
-        private RegionResult ParseBlock()
+        private RegionResult ParseStatement()
         {
-            var current = _history.Pop();
-            var start = GetModifierOffset(_lexResult.Start, 2);
-            _history.Push(current);
+            var start = _curLexResult.Start;
 
-            while(_lexResult.Code != Token.Eof)
+            while(_curLexResult.Code != Token.Eof)
             {
                 GetNextToken();
 
-                if(_lexResult.Code == Token.SemiColon)
+                if(_curLexResult.Code == Token.SemiColon)
                 {
                     return new RegionResult
                     {
                         Offset = start,
-                        Length = _lexResult.End - start
+                        Length = _curLexResult.End - start
                     };
                 }
 
-                if(_lexResult.Code == Token.LeftBracket)
+                // skip all in parenthese
+                if(_curLexResult.Code == Token.LeftParenthese)
+                {
+                    if(!SkipScope(Token.LeftParenthese, Token.RightParenthese))
+                    {
+                        return RegionResult.Incomplete();
+                    }
+
+                    continue;
+                }
+
+                // if block, return block region
+                if(_curLexResult.Code == Token.LeftBracket)
                 {
                     if(SkipScope(Token.LeftBracket, Token.RightBracket))
                     {
                         return new RegionResult
                         {
                             Offset = start,
-                            Length = _lexResult.End - start
+                            Length = _curLexResult.End - start
                         };
                     }
                     else
@@ -110,44 +103,12 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
                     }
                 }
             }
-            return RegionResult.Invalid();
-        }
-
-        private RegionResult ParseMethod()
-        {
-            var start = GetMethodSignatureOffset();
-            if(start.Item1)
-            {
-                if(!SkipScope(Token.LeftParenthese, Token.RightParenthese))
-                {
-                    return RegionResult.Incomplete();
-                }
-
-                GetNextToken();
-
-                if(_lexResult.Code == Token.LeftBracket)
-                {
-                    if(SkipScope(Token.LeftBracket, Token.RightBracket))
-                    {
-                        return new RegionResult
-                        {
-                            Offset = start.Item2,
-                            Length = _lexResult.End - start.Item2
-                        };
-                    }
-                    else
-                    {
-                        return RegionResult.Incomplete();
-                    }
-                }
-            }
-
             return RegionResult.Invalid();
         }
 
         private bool SkipScope(int leftToken, int rightToken)
         {
-            if(_lexResult.Code != leftToken)
+            if(_curLexResult.Code != leftToken)
             {
                 throw new ArgumentException("Invalid use of SkipBlock method, current token should equal left token parameter");
             }
@@ -155,16 +116,16 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
             Stack<int> _scope = new Stack<int>();
             _scope.Push(1);
 
-            while(_lexResult.Code != Token.Eof)
+            while(_curLexResult.Code != Token.Eof)
             {
                 GetNextToken();
 
-                if(_lexResult.Code == leftToken)
+                if(_curLexResult.Code == leftToken)
                 {
                     _scope.Push(1);
                 }
 
-                if(_lexResult.Code == rightToken)
+                if(_curLexResult.Code == rightToken)
                 {
                     _scope.Pop();
                 }
@@ -189,7 +150,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
             var methodName = _history.Pop();
             var methodResultType = _history.Pop();
 
-            if(methodResultType.Code != Token.Identifier || methodName.Code != Token.Identifier)
+            if(methodResultType.Code != Token.Identifier && methodName.Code != Token.Identifier)
             {
                 return new Tuple<bool, int>(false, -1);
             }
@@ -238,5 +199,6 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
 
             return start;
         }
-    }}
+    }
+}
 
