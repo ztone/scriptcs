@@ -102,6 +102,7 @@
     <Compile Include="Parser\Preparser\CodeSegementer.cs" />
     <Compile Include="Parser\Preparser\ScriptSegmenter.cs" />
     <Compile Include="Parser\Preparser\StringExtensions.cs" />
+    <Compile Include="MonoReporter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

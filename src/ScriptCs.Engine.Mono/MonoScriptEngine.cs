@@ -18,6 +18,7 @@ namespace ScriptCs.Engine.Mono
         public string BaseDirectory { get; set; }
         public string CacheDirectory { get; set; }
         public string FileName { get; set; }
+        public MonoReporter _reporter;
 
         public const string SessionKey = "MonoSession";
 
@@ -25,6 +26,7 @@ namespace ScriptCs.Engine.Mono
         {
             _scriptHostFactory = scriptHostFactory;
             Logger = logger;
+            _reporter = new MonoReporter();
         }
 
         public ILog Logger { get; set; }
@@ -37,6 +39,8 @@ namespace ScriptCs.Engine.Mono
 
             references.PathReferences.UnionWith(scriptPackSession.References);
 
+            _reporter.Clear();
+
             SessionState<Evaluator> sessionState;
             if (!scriptPackSession.State.ContainsKey(SessionKey))
             {
@@ -44,7 +48,7 @@ namespace ScriptCs.Engine.Mono
                 var context = new CompilerContext(new CompilerSettings
                 {
                     AssemblyReferences = references.PathReferences.ToList()
-                }, new ConsoleReportPrinter());
+                    }, _reporter);
 
                 var evaluator = new Evaluator(context);
                 var allNamespaces = namespaces.Union(scriptPackSession.Namespaces).Distinct();
@@ -96,10 +100,17 @@ namespace ScriptCs.Engine.Mono
             {
                 var segmenter = new CodeSegementer();
                 object scriptResult = null;
-                foreach(var segment in segmenter.Segment(code))
+                foreach(var segment in segmenter.SegmentCode(code))
                 {
                     bool resultSet;
-                    session.Evaluate(segment, out scriptResult, out resultSet);
+                    _reporter.SetRegion(segment.Region);
+                    session.Evaluate(segment.CodeSegment, out scriptResult, out resultSet);
+                }
+
+                if(_reporter.ErrorsCount != 0)
+                {
+                    return new ScriptResult(compilationException: 
+                        new Exception(_reporter.GetCompileExceptionMessages()));
                 }
 
                 return new ScriptResult(returnValue: scriptResult);

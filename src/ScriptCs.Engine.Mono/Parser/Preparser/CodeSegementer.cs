@@ -24,6 +24,88 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
 
     public class CodeSegementer
     {
+        public List<CodeMetaData> SegmentCode(string code)
+        {
+            const string ScriptPattern = @"#line 1.*?\n";
+            var isScriptFile = Regex.IsMatch(code, ScriptPattern);
+            if(isScriptFile)
+            {
+                // Remove debug line
+                code = Regex.Replace(code, ScriptPattern, "");
+            }
+
+            var ss = new ScriptSegmenter();
+            var segments = ss.Segment(code);
+
+            var metaData = new List<CodeMetaData>();
+
+            var parser = new SyntaxParser();
+
+            foreach(var region in segments.Segments)
+            {
+                var segment = code.Substring(region.Offset, region.Length);
+                region.LineNr = code.Substring(0, region.Offset).Count(x => x.Equals('\n'));
+
+                var parsedResult = parser.Parse(segment);
+
+                if(parsedResult.TypeDeclarations.Any())
+                {
+
+                    metaData.Add(new CodeMetaData
+                        {
+                            Segment = CodeSegment.Class,
+                            Region = region,
+                            CodeSegment = segment
+                        });
+                }
+                else if(parsedResult.MethodExpressions.Any())
+                {
+                    var purgedSegment = segment.PurgeExcept(Environment.NewLine);
+
+                    metaData.Add(new CodeMetaData
+                        {
+                            Segment = CodeSegment.Prototype,
+                            Region = region,
+                            CodeSegment = parsedResult.MethodPrototypes.FirstOrDefault() 
+                                + purgedSegment.Trim()
+                        });
+
+                    var segmentBlockStart = segment.IndexOf("{");
+                    var segmentBlockEnd = segment.LastIndexOf("}");
+                    var segmentMethodBlock = segment.Substring(segmentBlockStart, segmentBlockEnd - segmentBlockStart + 1);
+
+                    var method = parsedResult.MethodExpressions.FirstOrDefault();
+                    var methodBlockStart = method.IndexOf("{");
+                    var methodBlockEnd = method.LastIndexOf("}");
+                    method = method.Remove(methodBlockStart, methodBlockEnd - methodBlockStart + 1);
+                    method = method.Insert(methodBlockStart, segmentMethodBlock);
+
+                    var purgeSigneture = segment.Substring(0, segmentBlockStart - 1).PurgeExcept(Environment.NewLine);
+                    method = purgeSigneture.Trim() + method;
+
+                    metaData.Add(new CodeMetaData
+                        {
+                            Segment = CodeSegment.Method,
+                            Region = region,
+                            CodeSegment = method
+                        });
+                }
+                else
+                {
+                    metaData.Add(new CodeMetaData
+                        {
+                            Segment = CodeSegment.Evaluation,
+                            Region = region,
+                            CodeSegment = segment
+                        });
+                }
+            }
+
+            return  metaData
+                    .OrderBy(x => x.Segment)
+                    .ToList();
+        }
+
         public List<string> Segment(string code)
         {
             const string ScriptPattern = @"#line 1.*?\n";
