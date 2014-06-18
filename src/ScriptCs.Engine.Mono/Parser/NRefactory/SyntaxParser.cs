@@ -18,10 +18,12 @@
             var className = CreateUniqueName();
             code = WrapAsPseudoClass(className, code);
 
-            var classes = ExtractClassDeclarations(className, code);
+            var classes = GetClassDeclarations(code)
+                .Where(x => !x.GetText().StartsWith(string.Format("class {0}", className)))
+                .ToList();
             code = RemoveClasses(code, classes);
 
-            var methods = ExtractMethodDeclaration(code);
+            var methods = GetMethodDeclaration(code);
             code = RemoveMethods(code, methods);
 
             return new ParseResult 
@@ -33,7 +35,7 @@
             };
         }
          
-        private static IList<TypeDeclaration> ExtractClassDeclarations(string className, string code)
+        private static IList<TypeDeclaration> GetClassDeclarations(string code)
         {
             var visitor = new ClassTypeVisitor();
             var parser = new CSharpParser();
@@ -41,9 +43,7 @@
             syntaxTree.AcceptVisitor(visitor);
             syntaxTree.Freeze();
 
-            return visitor.GetClassDeclarations()
-                    .Where(x => !x.GetText().StartsWith(string.Format("class {0}", className)))
-                    .ToList();
+            return visitor.GetClassDeclarations();
         }
 
         private static string RemoveClasses(string code, IEnumerable<TypeDeclaration> classes)
@@ -65,7 +65,7 @@
             return document.Text;
         }
 
-        private static IList<MethodVisitorResult> ExtractMethodDeclaration(string code)
+        private static IList<MethodVisitorResult> GetMethodDeclaration(string code)
         {
             var visitor = new MethodVisitor();
             var parser = new CSharpParser();

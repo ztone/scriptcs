@@ -1,10 +1,26 @@
 namespace ScriptCs.Engine.Mono.Parser.Preparser
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
 
     using ScriptCs.Engine.Mono.Parser.NRefactory;
+
+    public enum CodeSegment
+    {
+        Class = 0,
+        Prototype = 1,
+        Method = 2,
+        Evaluation = 3
+    }
+
+    public class CodeMetaData
+    {
+        public CodeSegment Segment { get; set; }
+        public RegionResult Region { get; set; }
+        public string CodeSegment { get ; set; }
+    }
 
     public class CodeSegementer
     {
@@ -21,39 +37,82 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
             var ss = new ScriptSegmenter();
             var segments = ss.Segment(code);
 
-            var classes = new List<string>();
-            var proto = new List<string>();
-            var methods = new List<string>();
-            var evals = new List<string>();
+            var purgedCode = code.PurgeExcept(Environment.NewLine);
+
+            var metaData = new List<CodeMetaData>();
 
             var parser = new SyntaxParser();
+
             foreach(var region in segments.Segments)
             {
-                var result = parser.Parse(code.Substring(region.Offset, region.Length));
+                var segment = code.Substring(region.Offset, region.Length);
 
-                if(result.TypeDeclarations.Any())
+                var parsedResult = parser.Parse(segment);
+
+                if(parsedResult.TypeDeclarations.Any())
                 {
-                    classes.AddRange(result.TypeDeclarations);
+                    metaData.Add(new CodeMetaData
+                        {
+                            Segment = CodeSegment.Class,
+                            Region = region,
+                            CodeSegment = string.Format("{0}{1}",
+                                purgedCode.Substring(0, region.Offset),
+                                segment)
+                        });
                 }
-
-                if(result.MethodExpressions.Any())
+                else if(parsedResult.MethodExpressions.Any())
                 {
-                    proto.AddRange(result.MethodPrototypes);
-                    methods.AddRange(result.MethodExpressions);
+                    var purgedSegment = segment.PurgeExcept(Environment.NewLine);
+
+                    metaData.Add(new CodeMetaData
+                        {
+                            Segment = CodeSegment.Prototype,
+                            Region = region,
+                            CodeSegment = string.Format("{0}{1}",
+                                purgedCode.Substring(0, region.Offset-1),
+                                parsedResult.MethodPrototypes.FirstOrDefault() 
+                                + purgedSegment.Trim())
+                        });
+
+                    var segmentBlockStart = segment.IndexOf("{");
+                    var segmentBlockEnd = segment.LastIndexOf("}");
+                    var segmentMethodBlock = segment.Substring(segmentBlockStart, segmentBlockEnd - segmentBlockStart + 1);
+
+                    var method = parsedResult.MethodExpressions.FirstOrDefault();
+                    var methodBlockStart = method.IndexOf("{");
+                    var methodBlockEnd = method.LastIndexOf("}");
+                    method = method.Remove(methodBlockStart, methodBlockEnd - methodBlockStart + 1);
+                    method = method.Insert(methodBlockStart, segmentMethodBlock);
+
+                    var purgeSigneture = segment.Substring(0, segmentBlockStart - 1).PurgeExcept(Environment.NewLine);
+                    method = purgeSigneture.Trim() + method;
+
+                    metaData.Add(new CodeMetaData
+                        {
+                            Segment = CodeSegment.Method,
+                            Region = region,
+                            CodeSegment = string.Format("{0}{1}",
+                                purgedCode.Substring(0, region.Offset-1),
+                                method)
+                        });
                 }
-
-                if(!string.IsNullOrWhiteSpace(result.Evaluations))
+                else
                 {
-                    evals.Add(result.Evaluations);
+                    metaData.Add(new CodeMetaData
+                        {
+                            Segment = CodeSegment.Evaluation,
+                            Region = region,
+                            CodeSegment = string.Format("{0}{1}",
+                                purgedCode.Substring(0, region.Offset-1),
+                                segment)
+                        });
                 }
             }
 
-            var codeList = new List<string>();
-            codeList.AddRange(classes);
-            codeList.AddRange(proto);
-            codeList.AddRange(methods);
-            codeList.AddRange(evals);
-            return codeList;
+            return  metaData
+                .OrderBy(x => x.Segment)
+                .Select(x => x.CodeSegment)
+                .ToList();
         }
 
         public List<string> Run(string code)
