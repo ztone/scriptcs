@@ -44,6 +44,8 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
                 switch(_curLexResult.Code)
                 {
                 case Token.Eof: return _result;
+                case Token.LeftBracket:
+                case Token.LeftParenthese:
                 case Token.Class:
                 case Token.Block:
                 case Token.Identifier:
@@ -62,11 +64,16 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
         {
             var start = _curLexResult.Start;
 
+            //special case, first token is Left curly bracket.
+            bool block = _curLexResult.Code == Token.LeftBracket;
+        
             while(_curLexResult.Code != Token.Eof)
             {
                 GetNextToken();
 
-                if(_curLexResult.Code == Token.SemiColon || _curLexResult.Code == Token.Eof)
+                if( (!block && _curLexResult.Code == Token.SemiColon)
+                    || (block && _curLexResult.Code == Token.RightParenthese)
+                    || _curLexResult.Code == Token.Eof)
                 {
                     return new RegionResult
                     {
@@ -78,9 +85,14 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
                 // skip all in parenthese
                 if(_curLexResult.Code == Token.LeftParenthese)
                 {
-                    if(!SkipScope(Token.LeftParenthese, Token.RightParenthese))
+                    SkipScope(Token.LeftParenthese, Token.RightParenthese);
+                    if(_curLexResult.Code == Token.Eof)
                     {
-                        return RegionResult.Incomplete();
+                        return new RegionResult
+                        {
+                            Offset = start,
+                            Length = _curLexResult.End - start
+                        };
                     }
 
                     continue;
@@ -89,18 +101,14 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
                 // if block, return block region
                 if(_curLexResult.Code == Token.LeftBracket)
                 {
-                    if(SkipScope(Token.LeftBracket, Token.RightBracket))
+                    SkipScope(Token.LeftBracket, Token.RightBracket);
+
+                    return new RegionResult
                     {
-                        return new RegionResult
-                        {
-                            Offset = start,
-                            Length = _curLexResult.End - start
-                        };
-                    }
-                    else
-                    {
-                        return RegionResult.Incomplete();
-                    }
+                        Offset = start,
+                        Length = _curLexResult.End - start
+                    };
+
                 }
             }
             return RegionResult.Invalid();
@@ -137,67 +145,6 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
             }
 
             return false;
-        }
-
-        private Tuple<bool, int> GetMethodSignatureOffset()
-        {
-            if(_history.Count <= 2)
-            {
-                return new Tuple<bool, int>(false, -1);
-            }
-
-            var current = _history.Pop();
-            var methodName = _history.Pop();
-            var methodResultType = _history.Pop();
-
-            if(methodResultType.Code != Token.Identifier && methodName.Code != Token.Identifier)
-            {
-                return new Tuple<bool, int>(false, -1);
-            }
-
-            var start = GetModifierOffset(methodResultType.Start, 3);
-
-            _history.Push(methodResultType);
-            _history.Push(methodName);
-            _history.Push(current);
-
-            return new Tuple<bool, int>(true, start);;
-        }
-
-        private int GetModifierOffset(int start, int depth)
-        {
-            var modifiers = new[] { "public", "private", "internal", "protected", "static", "async" };
-
-            //check for modifiers
-            Stack<LexerResult> restoreHistory = new Stack<LexerResult>();
-            for(var i = 0; i < depth; i++)
-            {
-                if(_history.Count == 0)
-                {
-                    break;
-                }
-
-                var modifier = _history.Pop();
-                restoreHistory.Push(modifier);
-                if(modifier.Code != Token.Identifier || !modifiers.Contains(modifier.Identifier))
-                {
-                    break;
-                }
-
-                start = modifier.Start;
-            }
-
-            for(var i = 0; i < 3; i++)
-            {
-                if(restoreHistory.Count == 0)
-                {
-                    break;
-                }
-
-                _history.Push(restoreHistory.Pop());
-            }
-
-            return start;
         }
     }
 }

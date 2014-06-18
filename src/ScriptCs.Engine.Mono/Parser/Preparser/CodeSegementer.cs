@@ -50,7 +50,6 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
 
                 if(parsedResult.TypeDeclarations.Any())
                 {
-
                     metaData.Add(new CodeMetaData
                         {
                             Segment = CodeSegment.Class,
