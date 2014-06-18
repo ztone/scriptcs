@@ -84,7 +84,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser.Lexer
             }
 
             // identifiers [a-zA-Z_][a-zA-Z0-9_]
-            if(IsAlpha(_lastChar))
+            if(IsAlphaNumeric(_lastChar))
             {
                 _identifier = string.Empty;
                 _identifier += (char)_lastChar;

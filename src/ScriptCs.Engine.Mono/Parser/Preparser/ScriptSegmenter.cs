@@ -66,7 +66,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
             {
                 GetNextToken();
 
-                if(_curLexResult.Code == Token.SemiColon)
+                if(_curLexResult.Code == Token.SemiColon || _curLexResult.Code == Token.Eof)
                 {
                     return new RegionResult
                     {

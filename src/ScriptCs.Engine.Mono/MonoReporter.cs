@@ -14,13 +14,13 @@ namespace ScriptCs.Engine.Mono
     {
         private RegionResult _region;
         private List<Tuple<AbstractMessage, RegionResult>> _compileErrors;
-        private List<string> _executionErrors;
+        //private List<string> _executionErrors;
 
         public MonoReporter ()
         //: base(null)
         {
             _compileErrors = new List<Tuple<AbstractMessage, RegionResult>>();
-            _executionErrors = new List<string>();
+            //_executionErrors = new List<string>();
         }
 
         public void SetRegion(RegionResult region)
@@ -32,16 +32,13 @@ namespace ScriptCs.Engine.Mono
         {
             _region = null;
             _compileErrors = new List<Tuple<AbstractMessage, RegionResult>>();
-            _executionErrors = new List<string>();
+            //_executionErrors = new List<string>();
             Reset();
         }
 
         public override void Print (AbstractMessage msg, bool showFullPath)
         {
-            if(_region == null)
-            {
-                _executionErrors.Add(string.Format("Region not set for {0}", typeof(MonoReporter).Name));
-            }
+            Guard.AgainstNullArgument("Region", _region);
 
             if(!msg.IsWarning)
             {
