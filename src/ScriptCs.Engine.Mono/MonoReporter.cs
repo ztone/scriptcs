@@ -13,6 +13,8 @@ namespace ScriptCs.Engine.Mono
     public class MonoReporter : ReportPrinter //ConsoleReportPrinter //StreamReportPrinter
     {
         private RegionResult _region;
+        private CodeSegment _segment;
+
         private List<Tuple<AbstractMessage, RegionResult>> _compileErrors;
         //private List<string> _executionErrors;
 
@@ -23,13 +25,21 @@ namespace ScriptCs.Engine.Mono
             //_executionErrors = new List<string>();
         }
 
+        public bool DontErrorOnLooseMethods { get; set; }
+
         public void SetRegion(RegionResult region)
         {
             _region = region;
         }
 
+        public void SetSegment(CodeSegment segment)
+        {
+            _segment = segment;
+        }
+
         public void Clear()
         {
+            DontErrorOnLooseMethods = false;
             _region = null;
             _compileErrors = new List<Tuple<AbstractMessage, RegionResult>>();
             //_executionErrors = new List<string>();
@@ -39,6 +49,13 @@ namespace ScriptCs.Engine.Mono
         public override void Print (AbstractMessage msg, bool showFullPath)
         {
             Guard.AgainstNullArgument("Region", _region);
+
+            if(msg.Code == 1525 && _segment != CodeSegment.Method && !_region.IsCompleteBlock) 
+            {
+                DontErrorOnLooseMethods = true;
+                base.Print(msg, showFullPath);
+                return;
+            }
 
             if(!msg.IsWarning)
             {

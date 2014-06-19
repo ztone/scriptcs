@@ -85,13 +85,14 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
                 // skip all in parenthese
                 if(_curLexResult.Code == Token.LeftParenthese)
                 {
-                    SkipScope(Token.LeftParenthese, Token.RightParenthese);
+                    var isComplete = SkipScope(Token.LeftParenthese, Token.RightParenthese);
                     if(_curLexResult.Code == Token.Eof)
                     {
                         return new RegionResult
                         {
                             Offset = start,
-                            Length = _curLexResult.End - start
+                            Length = _curLexResult.End - start,
+                            IsCompleteBlock = isComplete
                         };
                     }
 
@@ -101,12 +102,12 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
                 // if block, return block region
                 if(_curLexResult.Code == Token.LeftBracket)
                 {
-                    SkipScope(Token.LeftBracket, Token.RightBracket);
-
+                    bool isComplete = SkipScope(Token.LeftBracket, Token.RightBracket);
                     return new RegionResult
                     {
                         Offset = start,
-                        Length = _curLexResult.End - start
+                        Length = _curLexResult.End - start,
+                        IsCompleteBlock = isComplete
                     };
 
                 }

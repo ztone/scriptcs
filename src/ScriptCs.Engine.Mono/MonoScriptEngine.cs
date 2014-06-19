@@ -104,9 +104,10 @@ namespace ScriptCs.Engine.Mono
                 {
                     bool resultSet;
                     _reporter.SetRegion(segment.Region);
+                    _reporter.SetSegment(segment.Segment);
 
                     var expr = session.Evaluate(segment.CodeSegment, out scriptResult, out resultSet);
-                    if(expr != null)
+                    if(expr != null || _reporter.DontErrorOnLooseMethods)
                     {
                         return ScriptResult.Incomplete;
                     }

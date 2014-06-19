@@ -9,10 +9,11 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
 
     public enum CodeSegment
     {
-        Class = 0,
-        Prototype = 1,
-        Method = 2,
-        Evaluation = 3
+        NotSet = 0,
+        Class = 1,
+        Prototype = 2,
+        Method = 3,
+        Evaluation = 4
     }
 
     public class CodeMetaData
@@ -57,7 +58,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
                             CodeSegment = segment
                         });
                 }
-                else if(parsedResult.MethodExpressions.Any())
+                else if(parsedResult.MethodExpressions.Any() && segment.EndsWith("}"))
                 {
                     var purgedSegment = segment.PurgeExcept(Environment.NewLine);
 

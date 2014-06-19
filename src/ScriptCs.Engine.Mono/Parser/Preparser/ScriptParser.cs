@@ -47,7 +47,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
                     if(region.IsValid)
                     {
                         _result.ClassRegions.Add(region);
-                        _result.Classes.Add( (!region.IsIncomplete)
+                        _result.Classes.Add( (!region.IsCompleteBlock)
                             ? new Tuple<bool, string>(false, code.Substring(region.Offset, region.Length))
                             : new Tuple<bool, string>(true, string.Empty));
                     }
@@ -62,7 +62,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
                     if(region.IsValid)
                     {
                         _result.MethodRegions.Add(region);
-                        _result.Methods.Add( (!region.IsIncomplete)
+                        _result.Methods.Add( (!region.IsCompleteBlock)
                             ? new Tuple<bool, string>(false, code.Substring(region.Offset, region.Length))
                             : new Tuple<bool, string>(true, string.Empty));
                     }

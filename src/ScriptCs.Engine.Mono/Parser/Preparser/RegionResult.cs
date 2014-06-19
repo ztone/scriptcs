@@ -12,7 +12,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
         public int LineNr { get;set; }
         public int Offset { get;set; }
         public int Length { get;set; }
-        public bool IsIncomplete { get;set; }
+        public bool IsCompleteBlock { get;set; }
         public bool IsValid { get; set; }
 
         public static RegionResult Incomplete()
@@ -21,7 +21,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
             {
                 Offset = 0,
                 Length = 0,
-                IsIncomplete = true,
+                IsCompleteBlock = true,
                 IsValid = true,
             };
         }
@@ -32,7 +32,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
             {
                 Offset = 0,
                 Length = 0,
-                IsIncomplete = false,
+                IsCompleteBlock = false,
                 IsValid = false,
             };
         }

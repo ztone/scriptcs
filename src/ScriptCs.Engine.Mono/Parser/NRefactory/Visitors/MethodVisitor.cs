@@ -58,7 +58,8 @@ namespace ScriptCs.Engine.Mono.Parser.NRefactory.Visitors
                 .FirstOrDefault();
             if (methodBody == null)
             {
-                throw new NullReferenceException(string.Format("Method '{0}' has no method body", methodName));
+                //throw new NullReferenceException(string.Format("Method '{0}' has no method body", methodName));
+                return;
             }
             methodBody = (BlockStatement)methodBody.Clone();
 
