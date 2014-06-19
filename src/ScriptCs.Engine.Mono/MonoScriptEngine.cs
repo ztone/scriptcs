@@ -4,11 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using Common.Logging;
 using MonoCSharp::Mono.CSharp;
 using ScriptCs.Contracts;
+using ScriptCs.Engine.Mono.Parser;
 using ScriptCs.Engine.Mono.Parser.NRefactory;
-using ScriptCs.Engine.Mono.Parser.Preparser;
 
 namespace ScriptCs.Engine.Mono
 {
@@ -98,7 +99,7 @@ namespace ScriptCs.Engine.Mono
         {
             try
             {
-                var segmenter = new CodeSegementer();
+                var segmenter = new ScriptSegementer();
                 object scriptResult = null;
                 foreach(var segment in segmenter.SegmentCode(code))
                 {

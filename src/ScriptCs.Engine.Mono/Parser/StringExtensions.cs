@@ -1,4 +1,4 @@
-namespace ScriptCs.Engine.Mono.Parser.Preparser
+namespace ScriptCs.Engine.Mono.Parser
 {
     public static class StringExtensions
     {

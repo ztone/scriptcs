@@ -1,4 +1,4 @@
-namespace ScriptCs.Engine.Mono.Parser.Preparser.Lexer
+namespace ScriptCs.Engine.Mono.Parser.Lexer
 {
     using System;
 

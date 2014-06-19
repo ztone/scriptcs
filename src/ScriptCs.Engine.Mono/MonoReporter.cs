@@ -6,14 +6,14 @@ using System.Linq;
 
 //using Mono.CSharp;
 using MonoCSharp::Mono.CSharp;
-using ScriptCs.Engine.Mono.Parser.Preparser;
+using ScriptCs.Engine.Mono.Parser;
 
 namespace ScriptCs.Engine.Mono
 {
     public class MonoReporter : ReportPrinter //ConsoleReportPrinter //StreamReportPrinter
     {
         private RegionResult _region;
-        private CodeSegment _segment;
+        private SegmentType _segment;
 
         private List<Tuple<AbstractMessage, RegionResult>> _compileErrors;
         //private List<string> _executionErrors;
@@ -32,7 +32,7 @@ namespace ScriptCs.Engine.Mono
             _region = region;
         }
 
-        public void SetSegment(CodeSegment segment)
+        public void SetSegment(SegmentType segment)
         {
             _segment = segment;
         }
@@ -50,7 +50,7 @@ namespace ScriptCs.Engine.Mono
         {
             Guard.AgainstNullArgument("Region", _region);
 
-            if(msg.Code == 1525 && _segment != CodeSegment.Method && !_region.IsCompleteBlock) 
+            if(msg.Code == 1525 && _segment != SegmentType.Method && !_region.IsCompleteBlock) 
             {
                 DontErrorOnLooseMethods = true;
                 base.Print(msg, showFullPath);

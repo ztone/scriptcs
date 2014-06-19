@@ -1,13 +1,11 @@
-using System;
-
-namespace ScriptCs.Engine.Mono.Parser.Preparser
+namespace ScriptCs.Engine.Mono.Parser
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
 
-    using ScriptCs.Engine.Mono.Parser.Preparser.Lexer;
+    using ScriptCs.Engine.Mono.Parser.Lexer;
 
     public class ScriptSegmenter
     {
@@ -21,7 +19,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
         }
 
 
-        public ParserResult Segment (string code)
+        public List<RegionResult> Segment (string code)
         {
             _lexer = new ScriptLexer(code);
             GetNextToken();
@@ -35,9 +33,9 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
             return _curLexResult;
         }
 
-        private ParserResult MainLoop(string code)
+        private List<RegionResult> MainLoop(string code)
         {
-            var _result = new ParserResult();
+            var _result = new List<RegionResult>();
             while(true)
             {
                 RegionResult region;
@@ -50,7 +48,7 @@ namespace ScriptCs.Engine.Mono.Parser.Preparser
                 case Token.Block:
                 case Token.Identifier:
                     region = ParseStatement(); 
-                    _result.Segments.Add(region);
+                    _result.Add(region);
                     GetNextToken();
                     break;
                 default: 
