@@ -99,15 +99,15 @@ namespace ScriptCs.Engine.Mono
         {
             try
             {
-                var segmenter = new ScriptSegementer();
+                var segmenter = new ScriptSegmenter();
                 object scriptResult = null;
-                foreach(var segment in segmenter.SegmentCode(code))
+                foreach(var segment in segmenter.Segment(code))
                 {
                     bool resultSet;
                     _reporter.SetRegion(segment.Region);
-                    _reporter.SetSegment(segment.Segment);
+                    _reporter.SetSegment(segment.SegmentType);
 
-                    var expr = session.Evaluate(segment.CodeSegment, out scriptResult, out resultSet);
+                    var expr = session.Evaluate(segment.SegmentCode, out scriptResult, out resultSet);
                     if(expr != null || _reporter.DontErrorOnLooseMethods)
                     {
                         return ScriptResult.Incomplete;

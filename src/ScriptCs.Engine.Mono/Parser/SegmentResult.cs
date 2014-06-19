@@ -4,9 +4,9 @@ namespace ScriptCs.Engine.Mono.Parser
 {
     public class SegmentResult
     {
-        public SegmentType Segment { get; set; }
+        public SegmentType SegmentType { get; set; }
         public RegionResult Region { get; set; }
-        public string CodeSegment { get ; set; }
+        public string SegmentCode { get ; set; }
     }
 }
 

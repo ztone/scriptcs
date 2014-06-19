@@ -96,12 +96,12 @@
     <Compile Include="Parser\SegmentType.cs" />
     <Compile Include="Parser\SegmentResult.cs" />
     <Compile Include="Parser\RegionResult.cs" />
-    <Compile Include="Parser\ScriptSegementer.cs" />
-    <Compile Include="Parser\ScriptSegmenter.cs" />
     <Compile Include="Parser\StringExtensions.cs" />
     <Compile Include="Parser\Lexer\LexerResult.cs" />
     <Compile Include="Parser\Lexer\ScriptLexer.cs" />
     <Compile Include="Parser\Lexer\Token.cs" />
+    <Compile Include="Parser\RegionSegmenter.cs" />
+    <Compile Include="Parser\ScriptSegmenter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

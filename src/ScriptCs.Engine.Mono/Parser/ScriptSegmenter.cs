@@ -2,149 +2,88 @@ namespace ScriptCs.Engine.Mono.Parser
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
-    using ScriptCs.Engine.Mono.Parser.Lexer;
+    using ScriptCs.Engine.Mono.Parser.NRefactory;
 
     public class ScriptSegmenter
     {
-        private ScriptLexer _lexer;
-        private LexerResult _curLexResult;
-        private Stack<LexerResult> _history = new Stack<LexerResult>();
-
-        public int TokenCount
+        public List<SegmentResult> Segment(string code)
         {
-            get { return _history.Count; }
-        }
-
-
-        public List<RegionResult> Segment (string code)
-        {
-            _lexer = new ScriptLexer(code);
-            GetNextToken();
-            return MainLoop(code);
-        }
-
-        private LexerResult GetNextToken()
-        {
-            _curLexResult = _lexer.GetToken();
-            _history.Push(_curLexResult);
-            return _curLexResult;
-        }
-
-        private List<RegionResult> MainLoop(string code)
-        {
-            var _result = new List<RegionResult>();
-            while(true)
+            const string ScriptPattern = @"#line 1.*?\n";
+            var isScriptFile = Regex.IsMatch(code, ScriptPattern);
+            if(isScriptFile)
             {
-                RegionResult region;
-                switch(_curLexResult.Code)
-                {
-                case Token.Eof: return _result;
-                case Token.LeftBracket:
-                case Token.LeftParenthese:
-                case Token.Class:
-                case Token.Block:
-                case Token.Identifier:
-                    region = ParseStatement(); 
-                    _result.Add(region);
-                    GetNextToken();
-                    break;
-                default: 
-                    GetNextToken();
-                    break;
-                }
+                // Remove debug line
+                code = Regex.Replace(code, ScriptPattern, "");
             }
-        }
 
-        private RegionResult ParseStatement()
-        {
-            var start = _curLexResult.Start;
-
-            //special case, first token is Left curly bracket.
-            bool block = _curLexResult.Code == Token.LeftBracket;
-        
-            while(_curLexResult.Code != Token.Eof)
+            var parser = new SyntaxParser();
+            var result = new List<SegmentResult>();
+            var regionSegmenter = new RegionSegmenter();
+            foreach(var region in regionSegmenter.Segment(code))
             {
-                GetNextToken();
+                var segment = code.Substring(region.Offset, region.Length);
+                region.LineNr = code.Substring(0, region.Offset).Count(x => x.Equals('\n'));
 
-                if( (!block && _curLexResult.Code == Token.SemiColon)
-                    || (block && _curLexResult.Code == Token.RightParenthese)
-                    || _curLexResult.Code == Token.Eof)
-                {
-                    return new RegionResult
-                    {
-                        Offset = start,
-                        Length = _curLexResult.End - start
-                    };
-                }
+                var parsedResult = parser.Parse(segment);
 
-                // skip all in parenthese
-                if(_curLexResult.Code == Token.LeftParenthese)
+                if(parsedResult.TypeDeclarations.Any())
                 {
-                    var isComplete = SkipScope(Token.LeftParenthese, Token.RightParenthese);
-                    if(_curLexResult.Code == Token.Eof)
-                    {
-                        return new RegionResult
+                    result.Add(new SegmentResult
                         {
-                            Offset = start,
-                            Length = _curLexResult.End - start,
-                            IsCompleteBlock = isComplete
-                        };
-                    }
-
-                    continue;
+                            SegmentType = SegmentType.Class,
+                            Region = region,
+                            SegmentCode = segment
+                        });
                 }
-
-                // if block, return block region
-                if(_curLexResult.Code == Token.LeftBracket)
+                else if(parsedResult.MethodExpressions.Any() && segment.EndsWith("}"))
                 {
-                    bool isComplete = SkipScope(Token.LeftBracket, Token.RightBracket);
-                    return new RegionResult
-                    {
-                        Offset = start,
-                        Length = _curLexResult.End - start,
-                        IsCompleteBlock = isComplete
-                    };
+                    var purgedSegment = segment.PurgeExcept(Environment.NewLine);
 
+                    result.Add(new SegmentResult
+                        {
+                            SegmentType = SegmentType.Prototype,
+                            Region = region,
+                            SegmentCode = parsedResult.MethodPrototypes.FirstOrDefault() 
+                                + purgedSegment.Trim()
+                        });
+
+                    var segmentBlockStart = segment.IndexOf("{");
+                    var segmentBlockEnd = segment.LastIndexOf("}");
+                    var segmentMethodBlock = segment.Substring(segmentBlockStart, segmentBlockEnd - segmentBlockStart + 1);
+
+                    var method = parsedResult.MethodExpressions.FirstOrDefault();
+                    var methodBlockStart = method.IndexOf("{");
+                    var methodBlockEnd = method.LastIndexOf("}");
+                    method = method.Remove(methodBlockStart, methodBlockEnd - methodBlockStart + 1);
+                    method = method.Insert(methodBlockStart, segmentMethodBlock);
+
+                    var purgeSigneture = segment.Substring(0, segmentBlockStart - 1).PurgeExcept(Environment.NewLine);
+                    method = purgeSigneture.Trim() + method;
+
+                    result.Add(new SegmentResult
+                        {
+                            SegmentType = SegmentType.Method,
+                            Region = region,
+                            SegmentCode = method
+                        });
                 }
-            }
-            return RegionResult.Invalid();
-        }
-
-        private bool SkipScope(int leftToken, int rightToken)
-        {
-            if(_curLexResult.Code != leftToken)
-            {
-                throw new ArgumentException("Invalid use of SkipBlock method, current token should equal left token parameter");
-            }
-
-            Stack<int> _scope = new Stack<int>();
-            _scope.Push(1);
-
-            while(_curLexResult.Code != Token.Eof)
-            {
-                GetNextToken();
-
-                if(_curLexResult.Code == leftToken)
+                else
                 {
-                    _scope.Push(1);
-                }
-
-                if(_curLexResult.Code == rightToken)
-                {
-                    _scope.Pop();
-                }
-
-                if(_scope.Count == 0)
-                {
-                    return true;
+                    result.Add(new SegmentResult
+                        {
+                            SegmentType = SegmentType.Evaluation,
+                            Region = region,
+                            SegmentCode = segment
+                        });
                 }
             }
 
-            return false;
+            return  result
+                    .OrderBy(x => x.SegmentType)
+                    .ToList();
         }
     }
 }
-
