@@ -46,6 +46,7 @@
     <Compile Include="Parser\Lexer\ScriptLexerTests.cs" />
     <Compile Include="Parser\NRefactory\SyntaxParserTests.cs" />
     <Compile Include="Parser\BlockParserTests.cs" />
+    <Compile Include="Parser\NRefactory\CodeReWriterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

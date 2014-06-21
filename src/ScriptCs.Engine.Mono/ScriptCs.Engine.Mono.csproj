@@ -95,6 +95,7 @@
     <Compile Include="Parser\Lexer\Token.cs" />
     <Compile Include="Parser\BlockResult.cs" />
     <Compile Include="Parser\BlockParser.cs" />
+    <Compile Include="Parser\NRefactory\CodeRewriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
