@@ -1,4 +1,4 @@
-﻿namespace ScriptCs.Engine.Mono.Parser
+﻿namespace ScriptCs.Engine.Mono.Parser.NRefactory
 {
     using System.Collections.Generic;
 

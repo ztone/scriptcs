@@ -85,11 +85,14 @@
     <Compile Include="MonoScriptEngine.cs" />
     <Compile Include="MonoHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Parser\Visitors\ClassTypeVisitor.cs" />
-    <Compile Include="Parser\Visitors\MethodVisitor.cs" />
-    <Compile Include="Parser\ParseResult.cs" />
-    <Compile Include="Parser\SyntaxParser.cs" />
-    <Compile Include="Parser\Visitors\MethodVisitorResult.cs" />
+    <Compile Include="Parser\NRefactory\Visitors\ClassTypeVisitor.cs" />
+    <Compile Include="Parser\NRefactory\Visitors\MethodVisitor.cs" />
+    <Compile Include="Parser\NRefactory\Visitors\MethodVisitorResult.cs" />
+    <Compile Include="Parser\NRefactory\ParseResult.cs" />
+    <Compile Include="Parser\NRefactory\SyntaxParser.cs" />
+    <Compile Include="Parser\Lexer\ScriptLexer.cs" />
+    <Compile Include="Parser\Lexer\LexerResult.cs" />
+    <Compile Include="Parser\Lexer\Token.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -110,5 +113,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Parser\" />
+    <Folder Include="Parser\NRefactory\" />
+    <Folder Include="Parser\Lexer\" />
   </ItemGroup>
 </Project>

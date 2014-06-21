@@ -1,9 +1,9 @@
-namespace ScriptCs.Engine.Mono.Tests.Parser
+namespace ScriptCs.Engine.Mono.Tests.Parser.NRefactory
 {
     using System;
     using System.Linq;
 
-    using ScriptCs.Engine.Mono.Parser;
+    using ScriptCs.Engine.Mono.Parser.NRefactory;
 
     using Should;
 

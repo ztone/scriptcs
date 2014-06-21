@@ -1,4 +1,4 @@
-﻿﻿namespace ScriptCs.Engine.Mono.Parser
+﻿namespace ScriptCs.Engine.Mono.Parser.NRefactory
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@
     using ICSharpCode.NRefactory.Editor;
     using ICSharpCode.NRefactory.CSharp.Refactoring;
 
-    using ScriptCs.Engine.Mono.Parser.Visitors;
+    using ScriptCs.Engine.Mono.Parser.NRefactory.Visitors;
 
     public class SyntaxParser
     {
