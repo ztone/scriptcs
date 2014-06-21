@@ -20,8 +20,8 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual(Token.Identifier);
-                token.Identifier.ShouldEqual("id");
+                token.Token.ShouldEqual(Token.Identifier);
+                token.TokenValue.ShouldEqual("id");
             }
 
             [Fact]
@@ -32,7 +32,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual(Token.SemiColon);
+                token.Token.ShouldEqual(Token.SemiColon);
             }
 
             [Fact]
@@ -43,7 +43,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual(Token.LeftBracket);
+                token.Token.ShouldEqual(Token.LeftBracket);
             }
 
             [Fact]
@@ -54,7 +54,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual(Token.RightBracket);
+                token.Token.ShouldEqual(Token.RightBracket);
             }
 
             [Fact]
@@ -65,7 +65,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual(Token.LeftParenthese);
+                token.Token.ShouldEqual(Token.LeftParenthese);
             }
 
             [Fact]
@@ -76,7 +76,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual(Token.RightParenthese);
+                token.Token.ShouldEqual(Token.RightParenthese);
             }
 
             [Fact]
@@ -87,10 +87,10 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual(Token.String);
+                token.Token.ShouldEqual(Token.String);
                 token.Start.ShouldEqual(0);
                 token.End.ShouldEqual(18);
-                token.Identifier.ShouldEqual(Code);
+                token.TokenValue.ShouldEqual(Code);
             }
 
             [Fact]
@@ -101,10 +101,10 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual(Token.String);
+                token.Token.ShouldEqual(Token.String);
                 token.Start.ShouldEqual(0);
                 token.End.ShouldEqual(2);
-                token.Identifier.ShouldEqual(Code);
+                token.TokenValue.ShouldEqual(Code);
             }
 
             [Fact]
@@ -115,8 +115,8 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual(Token.String);
-                token.Identifier.ShouldEqual(Code);
+                token.Token.ShouldEqual(Token.String);
+                token.TokenValue.ShouldEqual(Code);
             }
 
             [Fact]
@@ -127,10 +127,24 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual(Token.Character);
+                token.Token.ShouldEqual(Token.Character);
+                token.Start.ShouldEqual(0);
+                token.End.ShouldEqual(3);
+                token.TokenValue.ShouldEqual(Code);
+            }
+
+            [Fact]
+            public void ShouldNotFailOnIdentifyingCharactersAsToken()
+            {
+                const string Code = "\'A";
+
+                var lexer = new ScriptLexer(Code);
+                var token = lexer.GetToken();   
+
+                token.Token.ShouldEqual(Token.Character);
                 token.Start.ShouldEqual(0);
                 token.End.ShouldEqual(2);
-                token.Identifier.ShouldEqual(Code);
+                token.TokenValue.ShouldEqual(Code);
             }
 
             [Fact]
@@ -141,7 +155,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
                 var token = lexer.GetToken();   
 
-                token.Code.ShouldEqual('<');
+                token.Token.ShouldEqual('<');
             }
 
             [Fact]
@@ -152,13 +166,13 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
 
                 var token = lexer.GetToken();   
-                token.Code.ShouldEqual('{');
+                token.Token.ShouldEqual('{');
 
                 token = lexer.GetToken();   
-                token.Code.ShouldEqual('}');
+                token.Token.ShouldEqual('}');
 
                 token = lexer.GetToken();   
-                token.Code.ShouldEqual(Token.Eof);
+                token.Token.ShouldEqual(Token.Eof);
             }
 
             [Fact]
@@ -169,13 +183,13 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 var lexer = new ScriptLexer(Code);
 
                 var token = lexer.GetToken();   
-                token.Code.ShouldEqual('{');
+                token.Token.ShouldEqual('{');
 
                 token = lexer.GetToken();   
-                token.Code.ShouldEqual('}');
+                token.Token.ShouldEqual('}');
 
                 token = lexer.GetToken();   
-                token.Code.ShouldEqual(Token.Eof);
+                token.Token.ShouldEqual(Token.Eof);
             }
 
             [Fact]

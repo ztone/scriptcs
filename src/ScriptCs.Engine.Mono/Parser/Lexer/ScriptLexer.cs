@@ -9,7 +9,6 @@ namespace ScriptCs.Engine.Mono.Parser.Lexer
     public class ScriptLexer
     {
         private int _lastChar = ' ';
-        private string _identifier = string.Empty;
         private int _position;
         private StringReader _sr;
 
@@ -26,8 +25,6 @@ namespace ScriptCs.Engine.Mono.Parser.Lexer
         /// <returns>The next token</returns>
         public LexerResult GetToken()
         {
-            _identifier = string.Empty;
-
             // skip any whitespace
             while(IsSpace((char)_lastChar))
             {
@@ -36,14 +33,14 @@ namespace ScriptCs.Engine.Mono.Parser.Lexer
 
             if(_lastChar == Token.Quote)
             {
-                _identifier = string.Empty;
-                _identifier += (char)_lastChar;
+                var @string = string.Empty;
+                @string += (char)_lastChar;
 
                 int previous;
                 do {
                     previous = _lastChar;
                     _lastChar = Read();
-                    _identifier += (char)_lastChar;
+                    @string += (char)_lastChar;
                 } while(!(_lastChar == Token.Quote && previous != Token.EscapeChar) 
                     && _lastChar != Token.Eof);
 
@@ -51,29 +48,32 @@ namespace ScriptCs.Engine.Mono.Parser.Lexer
 
                 return new LexerResult
                 {
-                    Code = Token.String,
-                    Identifier = _identifier,
-                    Start = StartPos(),
+                    Token = Token.String,
+                    TokenValue = @string,
+                    Start = _position - @string.Length,
                     End = _position
                 };
             }
 
             if(_lastChar == Token.SingleQuote)
             {
-                string character = string.Empty;
-                character += (char)_lastChar;
+                string @char = string.Empty;
+                @char += (char)_lastChar;
 
-                _lastChar = Read(); //eat
-                character += (char)_lastChar;
-
-                _lastChar = Read(); //eat
-                character += (char)_lastChar;
+                _lastChar = Read();
+                int count = 0;
+                while(count < 2 && _lastChar != Token.Eof)
+                {
+                    count++;
+                    @char += (char)_lastChar;
+                    _lastChar = Read();
+                }
 
                 return new LexerResult
                 {
-                    Code = Token.Character,
-                    Identifier = character,
-                    Start = _position - (character.Length - 1),
+                    Token = Token.Character,
+                    TokenValue = @char,
+                    Start = _position - @char.Length,
                     End = _position
                 };
             }
@@ -81,20 +81,20 @@ namespace ScriptCs.Engine.Mono.Parser.Lexer
             // identifiers [a-zA-Z_][a-zA-Z0-9_]
             if(IsAlphaNumeric(_lastChar))
             {
-                _identifier = string.Empty;
-                _identifier += (char)_lastChar;
+                var identifier = string.Empty;
+                identifier += (char)_lastChar;
                 _lastChar =  Read();
                 while(IsAlphaNumeric(_lastChar))
                 {
-                    _identifier += (char)_lastChar;
+                    identifier += (char)_lastChar;
                     _lastChar =  Read();
                 }
 
                 return new LexerResult
                 {
-                    Code = Token.Identifier,
-                    Identifier = _identifier,
-                    Start = StartPos(),
+                    Token = Token.Identifier,
+                    TokenValue = identifier,
+                    Start = _position - identifier.Length,
                     End = _position
                 };
             }
@@ -139,9 +139,9 @@ namespace ScriptCs.Engine.Mono.Parser.Lexer
             {
                 return new LexerResult
                 {
-                    Code = Token.Eof,
-                    Identifier = string.Empty,
-                    Start = StartPos(),
+                    Token = Token.Eof,
+                    TokenValue = string.Empty,
+                    Start = _position - 1,
                     End = _position
                 };
             }
@@ -150,11 +150,17 @@ namespace ScriptCs.Engine.Mono.Parser.Lexer
             _lastChar = Read();
             return new LexerResult
             {
-                Code = thisChar,
-                Identifier = string.Empty,
-                Start = StartPos(),
+                Token = thisChar,
+                TokenValue = string.Empty,
+                Start = _position - 1,
                 End = _position
             };
+        }
+
+        private int Read()
+        {
+            _position += 1;
+            return _sr.Read();
         }
 
         public static bool IsSpace(int token)
@@ -169,22 +175,6 @@ namespace ScriptCs.Engine.Mono.Parser.Lexer
         {
             Regex rg = new Regex(@"^[a-zA-Z0-9_]*$");
             return rg.IsMatch(((char)token).ToString());
-        }
-
-        private int StartPos()
-        {
-            if(!string.IsNullOrWhiteSpace(_identifier))
-            {
-                return _position - _identifier.Length;
-            }
-
-            return _position - 1;
-        }
-
-        private int Read()
-        {
-            _position += 1;
-            return _sr.Read();
         }
     }
 }

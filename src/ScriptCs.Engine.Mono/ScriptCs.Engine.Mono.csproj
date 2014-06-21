@@ -93,6 +93,8 @@
     <Compile Include="Parser\Lexer\ScriptLexer.cs" />
     <Compile Include="Parser\Lexer\LexerResult.cs" />
     <Compile Include="Parser\Lexer\Token.cs" />
+    <Compile Include="Parser\BlockResult.cs" />
+    <Compile Include="Parser\BlockParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
