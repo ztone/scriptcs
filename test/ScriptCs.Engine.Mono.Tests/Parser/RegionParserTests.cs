@@ -7,7 +7,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
     using Should;
     using Xunit;
 
-    public class BlockParserTests
+    public class RegionParserTests
     {
         public class ParseStatements
         {
@@ -16,7 +16,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = ";";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(1);
@@ -29,7 +29,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "var x = 10;";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(1);
@@ -43,7 +43,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "var x = 123;Action a = () => x++;Console.WriteLine(x);";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(3);
@@ -62,7 +62,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "var version = File.ReadAllText(\"src/CommonAssemblyInfo.cs\").Split(new[] { \"AssemblyInformationalVersion(\\\"\" }, 2, StringSplitOptions.None).ElementAt(1).Split(new[] { '\"' }).First();";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(1);
@@ -76,7 +76,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "var bau = Require<Bau>();\n\nbau\n.Task(\"default\").DependsOn(string.IsNullOrWhiteSpace(ci) ? new[] { \"unit\", \"component\", \"pack\" } : new[] { \"unit\", \"component\", \"accept\", \"pack\" });\n";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(2);
@@ -96,7 +96,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "if (true) { some code; }";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(1);
@@ -109,7 +109,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "using(var s = File.Open(\"test.cs\")){ } public Foo(int x) { return x }";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(2);
@@ -126,7 +126,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "{ Foo(); }";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(1);
@@ -139,7 +139,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "for(var i = 0; i < 3; i++) { Foo(); }";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(1);
@@ -152,7 +152,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "do { }   while (true);";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(1);
@@ -166,7 +166,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "do { }   if (true);";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(2);
@@ -186,7 +186,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
             {
                 const string Code = "(10 + 5 * ( 4 - 8) )";
 
-                var parser = new BlockParser();
+                var parser = new RegionParser();
                 var result = parser.Parse(Code);
 
                 result.Count().ShouldEqual(1);

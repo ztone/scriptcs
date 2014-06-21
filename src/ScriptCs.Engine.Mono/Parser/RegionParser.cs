@@ -7,7 +7,7 @@ namespace ScriptCs.Engine.Mono.Parser
 
     using ScriptCs.Engine.Mono.Parser.Lexer;
 
-    public class BlockParser
+    public class RegionParser
     {
         private ScriptLexer _lexer;
         private LexerResult _current;
@@ -18,7 +18,7 @@ namespace ScriptCs.Engine.Mono.Parser
             get { return _history.Count; }
         }
 
-        public List<BlockResult> Parse(string code)
+        public List<RegionResult> Parse(string code)
         {
             _lexer = new ScriptLexer(code);
             GetNextToken();
@@ -32,12 +32,12 @@ namespace ScriptCs.Engine.Mono.Parser
             return _current;
         }
 
-        private List<BlockResult> MainLoop(string code)
+        private List<RegionResult> MainLoop(string code)
         {
-            var _result = new List<BlockResult>();
+            var _result = new List<RegionResult>();
             while(true)
             {
-                BlockResult region;
+                RegionResult region;
                 switch(_current.Token)
                 {
                 case Token.Eof: return _result;
@@ -65,7 +65,7 @@ namespace ScriptCs.Engine.Mono.Parser
             }
         }
 
-        private BlockResult ParseBlock()
+        private RegionResult ParseBlock()
         {
             var start = _current.Start;
 
@@ -80,7 +80,7 @@ namespace ScriptCs.Engine.Mono.Parser
                     || (block && _current.Token == Token.RightParenthese)
                     || _current.Token == Token.Eof)
                 {
-                    return new BlockResult
+                    return new RegionResult
                     {
                         Offset = start,
                         Length = _current.End - start
@@ -92,7 +92,7 @@ namespace ScriptCs.Engine.Mono.Parser
                     var isComplete = SkipScope(Token.LeftParenthese, Token.RightParenthese);
                     if(_current.Token == Token.Eof)
                     {
-                        return new BlockResult
+                        return new RegionResult
                         {
                             Offset = start,
                             Length = _current.End - start,
@@ -106,7 +106,7 @@ namespace ScriptCs.Engine.Mono.Parser
                 if(_current.Token == Token.LeftBracket)
                 {
                     bool isComplete = SkipScope(Token.LeftBracket, Token.RightBracket);
-                    return new BlockResult
+                    return new RegionResult
                     {
                         Offset = start,
                         Length = _current.End - start,
@@ -115,7 +115,8 @@ namespace ScriptCs.Engine.Mono.Parser
 
                 }
             }
-            throw new InvalidOperationException("Should never be here");
+
+            throw new InvalidOperationException(typeof(RegionParser).Name + "should never reach this point.");
         }
 
         private bool SkipScope(int leftToken, int rightToken)
