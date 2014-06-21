@@ -7,6 +7,7 @@ namespace ScriptCs.Engine.Mono.Parser.Lexer
         public const int Identifier = -2;
         public const int String = -3;
         public const int Character = -4;
+        public const int Do = -5;
         public const int LeftBracket = (int)'{';
         public const int RightBracket = (int)'}';
         public const int LeftParenthese = (int)'(';

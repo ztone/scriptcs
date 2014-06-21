@@ -207,6 +207,18 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.Lexer
                 result.Start.ShouldEqual(3);
                 result.End.ShouldEqual(4);
             }
+
+            [Fact]
+            public void ShouldIdentifyIDoAsToken()
+            {
+                const string Code = "do { } while(true); ";
+
+                var lexer = new ScriptLexer(Code);
+                var token = lexer.GetToken();   
+
+                token.Token.ShouldEqual(Token.Do);
+                token.TokenValue.ShouldEqual("do");
+            }
         }
     }
 }

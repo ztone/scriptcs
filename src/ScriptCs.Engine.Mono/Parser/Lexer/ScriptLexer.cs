@@ -92,7 +92,7 @@ namespace ScriptCs.Engine.Mono.Parser.Lexer
 
                 return new LexerResult
                 {
-                    Token = Token.Identifier,
+                    Token = (identifier.Equals("do")) ? Token.Do : Token.Identifier,
                     TokenValue = identifier,
                     Start = _position - identifier.Length,
                     End = _position

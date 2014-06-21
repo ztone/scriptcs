@@ -41,6 +41,21 @@ namespace ScriptCs.Engine.Mono.Parser
                 switch(_current.Token)
                 {
                 case Token.Eof: return _result;
+                case Token.Do: // do-while has two blocks
+                    region = ParseBlock();
+                    GetNextToken();
+                    if(_current.TokenValue.Equals("while"))
+                    {
+                        var doRegion = ParseBlock();
+                        doRegion.Length = region.Length + doRegion.Length + 
+                            (doRegion.Offset - (region.Offset+region.Length));
+                        doRegion.Offset = region.Offset;
+                        _result.Add(doRegion);
+                        GetNextToken();
+                        break;
+                    }
+                    _result.Add(region);
+                    break;
                 default: 
                     region = ParseBlock(); 
                     _result.Add(region);

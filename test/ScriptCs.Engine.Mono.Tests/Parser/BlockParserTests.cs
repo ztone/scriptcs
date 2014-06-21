@@ -147,14 +147,10 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
                 Code.Substring(region.Offset, region.Length).ShouldEqual(Code);
             }
 
-            // TODO: Fix Do condition statement
-            // Create new Token.Do
-            // Call ParseStatement again and join ... verfiy that sec statement is while
-            /*                                    
             [Fact]
-            public void ShouldExtractDoStatements()
+            public void ShouldExtractDoWhileAsSingleBlock()
             {
-                const string Code = "do { } while(true);";
+                const string Code = "do { }   while (true);";
 
                 var parser = new BlockParser();
                 var result = parser.Parse(Code);
@@ -162,8 +158,25 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
                 result.Count().ShouldEqual(1);
                     
                 var region = result[0];
-                Code.Substring(region.Offset, region.Length).ShouldEqual("do { } while(true);");
-            }*/
+                Code.Substring(region.Offset, region.Length).ShouldEqual(Code);
+            }
+
+            [Fact]
+            public void ShouldExtractInvalidDoWhileAsTwoBlocks()
+            {
+                const string Code = "do { }   if (true);";
+
+                var parser = new BlockParser();
+                var result = parser.Parse(Code);
+
+                result.Count().ShouldEqual(2);
+
+                var region = result[0];
+                Code.Substring(region.Offset, region.Length).ShouldEqual("do { }");
+
+                region = result[1];
+                Code.Substring(region.Offset, region.Length).ShouldEqual("if (true);");
+            }
         }
 
         public class ParseExpressions
