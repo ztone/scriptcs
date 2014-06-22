@@ -37,7 +37,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.NRefactory
                 const string Code = "class A { } ";
 
                 var rewriter = new CodeRewriter();
-                rewriter.IsMethod(Code).ShouldBeFalse();
+                rewriter.IsMethod(Code).Item1.ShouldBeFalse();
             }
 
             [Fact]
@@ -46,7 +46,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.NRefactory
                 const string Code = "void Bar() { ";
 
                 var rewriter = new CodeRewriter();
-                rewriter.IsMethod(Code).ShouldBeFalse();
+                rewriter.IsMethod(Code).Item1.ShouldBeFalse();
             }
 
             [Fact]
@@ -55,7 +55,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.NRefactory
                 const string Code = "void Bar()";
 
                 var rewriter = new CodeRewriter();
-                rewriter.IsMethod(Code).ShouldBeFalse();
+                rewriter.IsMethod(Code).Item1.ShouldBeFalse();
             }
 
             [Fact]
@@ -64,7 +64,7 @@ namespace ScriptCs.Engine.Mono.Tests.Parser.NRefactory
                 const string Code = "void Bar() { }";
 
                 var rewriter = new CodeRewriter();
-                rewriter.IsMethod(Code).ShouldBeTrue();
+                rewriter.IsMethod(Code).Item1.ShouldBeTrue();
             }
         }
 

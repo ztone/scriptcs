@@ -1,9 +1,11 @@
 namespace ScriptCs.Engine.Mono.Parser.NRefactory
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
 
     using ICSharpCode.NRefactory.CSharp;
+    using ICSharpCode.NRefactory.TypeSystem;
 
     using ScriptCs.Engine.Mono.Parser.NRefactory.Visitors;
 
@@ -20,7 +22,7 @@ namespace ScriptCs.Engine.Mono.Parser.NRefactory
             return visitor.GetClassDeclarations().Any();
         }
 
-        public bool IsMethod(string code)
+        public Tuple<bool, List<CompileErrorMessage>> IsMethod(string code)
         {
             var @class = "class A { " + code + " } ";
             var visitor = new MethodVisitor();
@@ -29,7 +31,29 @@ namespace ScriptCs.Engine.Mono.Parser.NRefactory
             syntaxTree.AcceptVisitor(visitor);
             syntaxTree.Freeze();
 
-            return visitor.GetMethodDeclarations().Any() && code.TrimEnd().EndsWith("}");
+            List<CompileErrorMessage> errors = null;
+            if(syntaxTree.Errors.Any())
+            {
+                errors = FormatMessages(syntaxTree.Errors);
+            }
+
+            return new Tuple<bool, List<CompileErrorMessage>>(
+                visitor.GetMethodDeclarations().Any() && code.TrimEnd().EndsWith("}"),
+                errors);
+        }
+
+        private List<CompileErrorMessage> FormatMessages(List<Error> msg)
+        {
+            var result = new List<CompileErrorMessage>();
+            foreach(var error in msg)
+            {
+                result.Add(new CompileErrorMessage(
+                    1525, 
+                    error.Region.BeginLine, 
+                    error.Region.BeginColumn, 
+                    error.Message));
+            }
+            return result;
         }
 
         public Tuple<string, string> RewriteMethod(string code)

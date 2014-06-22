@@ -24,8 +24,8 @@ namespace ScriptCs.Engine.Mono.Parser
             var parser = new RegionParser();
             foreach(var region in parser.Parse(code))
             {
-                // add the line row to region
-                region.LineNr = code.Substring(0, region.Offset).Count(x => x.Equals('\n'));
+                // Calculate region linenumber
+                var lineNr = code.Substring(0, region.Offset).Count(x => x.Equals('\n'));
 
                 var segment = code.Substring(region.Offset, region.Length);
 
@@ -34,36 +34,53 @@ namespace ScriptCs.Engine.Mono.Parser
                     result.Add(new SegmentResult
                         {
                             Type = SegmentType.Class,
-                            Region = region,
+                            BeginLine = lineNr,
                             Code = segment
                         });
                 }
-                else if(rewriter.IsMethod(segment))
+                else 
                 {
-                    var method = rewriter.RewriteMethod(segment);
+                    var isMethod = rewriter.IsMethod(segment);
 
-                    result.Add(new SegmentResult
-                        {
-                            Type = SegmentType.Prototype,
-                            Region = region,
-                            Code = method.Item1
-                        });
+                    // can't rewrite method, has error
+                    if(isMethod.Item1 && isMethod.Item2 != null)
+                    {
+                        result.Add(new SegmentResult
+                            {
+                                Type = SegmentType.MethodError,
+                                BeginLine = lineNr,
+                                Code = segment,
+                                ErrorMessages = isMethod.Item2
+                            });
+                    }
+                    // method ok
+                    else if(isMethod.Item1)
+                    {
+                        var method = rewriter.RewriteMethod(segment);
 
-                    result.Add(new SegmentResult
-                        {
-                            Type = SegmentType.Method,
-                            Region = region,
-                            Code = method.Item2
-                        });
-                }
-                else
-                {
-                    result.Add(new SegmentResult
-                        {
-                            Type = SegmentType.Evaluation,
-                            Region = region,
-                            Code = segment
-                        });
+                        result.Add(new SegmentResult
+                            {
+                                Type = SegmentType.Prototype,
+                                BeginLine = lineNr,
+                                Code = method.Item1
+                            });
+
+                        result.Add(new SegmentResult
+                            {
+                                Type = SegmentType.Method,
+                                BeginLine = lineNr,
+                                Code = method.Item2
+                            });
+                    }
+                    else
+                    {
+                        result.Add(new SegmentResult
+                            {
+                                Type = SegmentType.Evaluation,
+                                BeginLine = lineNr,
+                                Code = segment
+                            });
+                    }
                 }
             }
 

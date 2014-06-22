@@ -97,7 +97,8 @@
     <Compile Include="Parser\ScriptSegmenter.cs" />
     <Compile Include="Parser\SegmentResult.cs" />
     <Compile Include="Parser\SegmentType.cs" />
-    <Compile Include="MonoReportPrinter.cs" />
+    <Compile Include="ReportPrinter\MonoReportPrinter.cs" />
+    <Compile Include="ReportPrinter\CompileErrorMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -120,5 +121,6 @@
     <Folder Include="Parser\" />
     <Folder Include="Parser\NRefactory\" />
     <Folder Include="Parser\Lexer\" />
+    <Folder Include="ReportPrinter\" />
   </ItemGroup>
 </Project>

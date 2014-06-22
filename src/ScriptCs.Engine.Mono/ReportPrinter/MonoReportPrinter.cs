@@ -1,6 +1,6 @@
 extern alias MonoCSharp;
 
-namespace ScriptCs.Engine.Mono
+namespace ScriptCs.Engine.Mono.ReportPrinter
 {
     using System;
     using System.Collections.Generic;
@@ -12,18 +12,18 @@ namespace ScriptCs.Engine.Mono
 
     public class MonoReportPrinter : ReportPrinter
     {
-        private List<Tuple<AbstractMessage, RegionResult>> _compileErrors;
-        private RegionResult _region;
+        private List<Tuple<CompileErrorMessage, int>> _compileErrors;
+        private int _currentLine;
 
-        public void SetRegion(RegionResult region)
+        public void SetCurrentLine(int lineNumber)
         {
-            _region = region;
+            _currentLine = lineNumber;
         }
 
         public void Clear()
         {
-            _region = null;
-            _compileErrors = new List<Tuple<AbstractMessage, RegionResult>>();
+            _currentLine = 0;
+            _compileErrors = new List<Tuple<CompileErrorMessage, int>>();
             Reset();
         }
 
@@ -31,10 +31,19 @@ namespace ScriptCs.Engine.Mono
         {
             if(!msg.IsWarning)
             {
-                _compileErrors.Add(new Tuple<AbstractMessage, RegionResult>(msg, _region));
+                _compileErrors.Add(new Tuple<CompileErrorMessage, int>(
+                    new CompileErrorMessage(msg), _currentLine));
             }
 
             base.Print(msg, showFullPath);
+        }
+
+        public void AddErrors(List<CompileErrorMessage> errorMessages)
+        {
+            foreach(var message in errorMessages)
+            {
+                _compileErrors.Add(new Tuple<CompileErrorMessage, int>(message, _currentLine));
+            }
         }
 
         public string GetCompileExceptionMessages()
@@ -45,16 +54,15 @@ namespace ScriptCs.Engine.Mono
             }
 
             return _compileErrors.Aggregate(string.Empty, 
-                (x, y) => x + Environment.NewLine + FormatMessage(y));
+                (x, y) => x + Environment.NewLine + FormatMessage(y)).Trim();
         }
 
-        private string FormatMessage(Tuple<AbstractMessage, RegionResult> msg)
+        private string FormatMessage(Tuple<CompileErrorMessage, int> msg)
         {
-            var lineNr = (msg.Item2 != null) ? msg.Item2.LineNr : 0;
 
             return string.Format(
                 "({0},{1}) CS{2:0000} {3}", 
-                msg.Item1.Location.Row + lineNr, 
+                msg.Item1.Location.Row + msg.Item2, 
                 msg.Item1.Location.Column, 
                 msg.Item1.Code, 
                 msg.Item1.Text);

@@ -4,8 +4,9 @@ namespace ScriptCs.Engine.Mono.Parser
     {
         NotSet = 0,
         Class = 1,
-        Prototype = 2,
-        Method = 3,
-        Evaluation = 4
+        MethodError = 2,
+        Prototype = 3,
+        Method = 4,
+        Evaluation = 5
     }
 }

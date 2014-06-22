@@ -30,6 +30,23 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
                 result[3].Type.ShouldEqual(SegmentType.Evaluation);
                 result[3].Code.ShouldEqual("Bar();");
             }
+
+            [Fact]
+            public void ShouldReturnErrorWhenRewritingMethod()
+            {
+                const string Code = "error void Bar() {}";
+
+                var segmenter = new ScriptSegmenter();
+
+                var result = segmenter.Segment(Code);
+
+                result.Count().ShouldEqual(1);
+
+                result[0].Type.ShouldEqual(SegmentType.MethodError);
+                result[0].Code.ShouldEqual("Unexpected symbol `void' in class, struct, or interface member declaration");
+                //result[0].Region.Offset.ShouldEqual(0);
+                //result[0].Region.Length.ShouldEqual(4);
+            }
         }
     }
 }

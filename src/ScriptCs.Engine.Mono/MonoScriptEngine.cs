@@ -8,6 +8,7 @@ using Common.Logging;
 using MonoCSharp::Mono.CSharp;
 using ScriptCs.Contracts;
 using ScriptCs.Engine.Mono.Parser;
+using ScriptCs.Engine.Mono.ReportPrinter;
 
 namespace ScriptCs.Engine.Mono
 {
@@ -103,11 +104,18 @@ namespace ScriptCs.Engine.Mono
                 foreach(var segment in segmenter.Segment(code))
                 {
                     bool resultSet;
-                    _reporter.SetRegion(segment.Region);
-                    session.Evaluate(segment.Code, out scriptResult, out resultSet);
+                    _reporter.SetCurrentLine(segment.BeginLine);
+                    if(segment.Type != SegmentType.MethodError)
+                    {
+                        session.Evaluate(segment.Code, out scriptResult, out resultSet);
+                    }
+                    else
+                    {
+                        _reporter.AddErrors(segment.ErrorMessages);
+                    }
                 }
 
-                if(_reporter.ErrorsCount != 0)
+                if(!string.IsNullOrEmpty(_reporter.GetCompileExceptionMessages()))
                 {
                     return new ScriptResult(compilationException: 
                         new Exception(_reporter.GetCompileExceptionMessages()));
@@ -117,6 +125,12 @@ namespace ScriptCs.Engine.Mono
             }
             catch (Exception ex)
             {
+                if(!string.IsNullOrEmpty(_reporter.GetCompileExceptionMessages()))
+                {
+                    return new ScriptResult(compilationException: 
+                        new Exception(_reporter.GetCompileExceptionMessages()));
+                }
+
                 return new ScriptResult(executionException: ex);
             }
         }
