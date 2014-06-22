@@ -33,9 +33,9 @@ namespace ScriptCs.Engine.Mono.Parser
                 {
                     result.Add(new SegmentResult
                         {
-                            SegmentType = SegmentType.Class,
+                            Type = SegmentType.Class,
                             Region = region,
-                            SegmentCode = segment
+                            Code = segment
                         });
                 }
                 else if(rewriter.IsMethod(segment))
@@ -44,31 +44,31 @@ namespace ScriptCs.Engine.Mono.Parser
 
                     result.Add(new SegmentResult
                         {
-                            SegmentType = SegmentType.Prototype,
+                            Type = SegmentType.Prototype,
                             Region = region,
-                            SegmentCode = method.Item1
+                            Code = method.Item1
                         });
 
                     result.Add(new SegmentResult
                         {
-                            SegmentType = SegmentType.Method,
+                            Type = SegmentType.Method,
                             Region = region,
-                            SegmentCode = method.Item2
+                            Code = method.Item2
                         });
                 }
                 else
                 {
                     result.Add(new SegmentResult
                         {
-                            SegmentType = SegmentType.Evaluation,
+                            Type = SegmentType.Evaluation,
                             Region = region,
-                            SegmentCode = segment
+                            Code = segment
                         });
                 }
             }
 
             return  result
-                    .OrderBy(x => x.SegmentType)
+                    .OrderBy(x => x.Type)
                     .ToList();
         }
     }

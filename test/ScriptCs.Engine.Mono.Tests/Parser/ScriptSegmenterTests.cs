@@ -21,14 +21,14 @@ namespace ScriptCs.Engine.Mono.Tests.Parser
 
                 result.Count().ShouldEqual(4);
 
-                result[0].SegmentType.ShouldEqual(SegmentType.Class);
-                result[0].SegmentCode.ShouldEqual("class A {}");
-                result[1].SegmentType.ShouldEqual(SegmentType.Prototype);
-                result[1].SegmentCode.ShouldEqual("Action Bar;");
-                result[2].SegmentType.ShouldEqual(SegmentType.Method);
-                result[2].SegmentCode.ShouldEqual("Bar = delegate () {};");
-                result[3].SegmentType.ShouldEqual(SegmentType.Evaluation);
-                result[3].SegmentCode.ShouldEqual("Bar();");
+                result[0].Type.ShouldEqual(SegmentType.Class);
+                result[0].Code.ShouldEqual("class A {}");
+                result[1].Type.ShouldEqual(SegmentType.Prototype);
+                result[1].Code.ShouldEqual("Action Bar;");
+                result[2].Type.ShouldEqual(SegmentType.Method);
+                result[2].Code.ShouldEqual("Bar = delegate () {};");
+                result[3].Type.ShouldEqual(SegmentType.Evaluation);
+                result[3].Code.ShouldEqual("Bar();");
             }
         }
     }

@@ -88,8 +88,6 @@
     <Compile Include="Parser\NRefactory\Visitors\ClassTypeVisitor.cs" />
     <Compile Include="Parser\NRefactory\Visitors\MethodVisitor.cs" />
     <Compile Include="Parser\NRefactory\Visitors\MethodVisitorResult.cs" />
-    <Compile Include="Parser\NRefactory\ParseResult.cs" />
-    <Compile Include="Parser\NRefactory\SyntaxParser.cs" />
     <Compile Include="Parser\Lexer\ScriptLexer.cs" />
     <Compile Include="Parser\Lexer\LexerResult.cs" />
     <Compile Include="Parser\Lexer\Token.cs" />

@@ -7,7 +7,7 @@ using System.Text;
 using Common.Logging;
 using MonoCSharp::Mono.CSharp;
 using ScriptCs.Contracts;
-using ScriptCs.Engine.Mono.Parser.NRefactory;
+using ScriptCs.Engine.Mono.Parser;
 
 namespace ScriptCs.Engine.Mono
 {
@@ -93,46 +93,20 @@ namespace ScriptCs.Engine.Mono
         {
             try
             {
-                var parser = new SyntaxParser();
-                var parseResult = parser.Parse(code);
-
-                if (parseResult.TypeDeclarations != null && parseResult.TypeDeclarations.Any())
+                object scriptResult = null;
+                var segmenter = new ScriptSegmenter();
+                foreach(var segment in segmenter.Segment(code))
                 {
-                    foreach (var @class in parseResult.TypeDeclarations)
-                    {
-                        session.Compile(@class);
-                    }
-                }
-
-                if (parseResult.MethodExpressions != null && parseResult.MethodExpressions.Any())
-                {
-                    foreach (var prototype in parseResult.MethodPrototypes)
-                    {
-                        session.Run(prototype);
-                    }
-
-                    foreach (var method in parseResult.MethodExpressions)
-                    {
-                        session.Run(method);
-                    }
-                }
-
-                if (!string.IsNullOrWhiteSpace(parseResult.Evaluations))
-                {
-                    object scriptResult;
                     bool resultSet;
-
-                    session.Evaluate(parseResult.Evaluations, out scriptResult, out resultSet);
-
-                    return new ScriptResult(returnValue: scriptResult);
+                    session.Evaluate(segment.Code, out scriptResult, out resultSet);
                 }
+
+                return new ScriptResult(returnValue: scriptResult);
             }
             catch (Exception ex)
             {
                 return new ScriptResult(executionException: ex);
             }
-
-            return ScriptResult.Empty;
         }
 
         private void ImportNamespaces(IEnumerable<string> namespaces, SessionState<Evaluator> sessionState)
