@@ -97,6 +97,7 @@
     <Compile Include="Parser\ScriptSegmenter.cs" />
     <Compile Include="Parser\SegmentResult.cs" />
     <Compile Include="Parser\SegmentType.cs" />
+    <Compile Include="MonoReportPrinter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

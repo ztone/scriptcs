@@ -14,6 +14,8 @@ namespace ScriptCs.Engine.Mono
     public class MonoScriptEngine : IScriptEngine
     {
         private readonly IScriptHostFactory _scriptHostFactory;
+        public MonoReportPrinter _reporter;
+
         public string BaseDirectory { get; set; }
         public string CacheDirectory { get; set; }
         public string FileName { get; set; }
@@ -23,6 +25,7 @@ namespace ScriptCs.Engine.Mono
         public MonoScriptEngine(IScriptHostFactory scriptHostFactory, ILog logger)
         {
             _scriptHostFactory = scriptHostFactory;
+            _reporter = new MonoReportPrinter();
             Logger = logger;
         }
 
@@ -36,6 +39,8 @@ namespace ScriptCs.Engine.Mono
 
             references.PathReferences.UnionWith(scriptPackSession.References);
 
+            _reporter.Clear();
+
             SessionState<Evaluator> sessionState;
             if (!scriptPackSession.State.ContainsKey(SessionKey))
             {
@@ -43,7 +48,7 @@ namespace ScriptCs.Engine.Mono
                 var context = new CompilerContext(new CompilerSettings
                 {
                     AssemblyReferences = references.PathReferences.ToList()
-                }, new ConsoleReportPrinter());
+                    }, _reporter);
 
                 var evaluator = new Evaluator(context);
                 var allNamespaces = namespaces.Union(scriptPackSession.Namespaces).Distinct();
@@ -98,7 +103,14 @@ namespace ScriptCs.Engine.Mono
                 foreach(var segment in segmenter.Segment(code))
                 {
                     bool resultSet;
+                    _reporter.SetRegion(segment.Region);
                     session.Evaluate(segment.Code, out scriptResult, out resultSet);
+                }
+
+                if(_reporter.ErrorsCount != 0)
+                {
+                    return new ScriptResult(compilationException: 
+                        new Exception(_reporter.GetCompileExceptionMessages()));
                 }
 
                 return new ScriptResult(returnValue: scriptResult);
